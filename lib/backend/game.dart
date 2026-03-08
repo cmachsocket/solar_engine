@@ -269,8 +269,8 @@ class GameEngine {
                   ), // remove parentheses
             );
           });
-          final audioPath =
-              path.join(scenarioPath, "${results.length + 1}.mp3");
+          final audioPath = path.join(gameState["scenarioPath"],
+              "${gameState["scenario"]}_${results.length + 1}.wav");
           textUnion.charactersAudioPath =
               await fileManager.file_exists_and_not_empty(audioPath)
                   ? audioPath

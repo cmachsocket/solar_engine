@@ -146,6 +146,16 @@ class CGController extends GetxController {
         volume: isMute.value ? 0 : musicVolume.value / 100);
   }
 
+  Future<RxDouble> get_character_audio_ratio() async {
+    Duration? totalDuration = await characterPlayer.getDuration();
+    Duration? currentPosition = await characterPlayer.getCurrentPosition();
+    if (totalDuration != null && currentPosition != null) {
+      return (currentPosition.inMilliseconds / totalDuration.inMilliseconds)
+          .obs;
+    }
+    return 0.0.obs;
+  }
+
   Future<void> play_character_audio(String path) async {
     if (path.isEmpty) return;
     await characterPlayer.stop();
@@ -153,7 +163,7 @@ class CGController extends GetxController {
         volume: isMute.value ? 0 : characterVoiceVolume.value / 100);
   }
 
-  Future<bool> is_character_audio_playing() async {
+  bool is_character_audio_playing() {
     bool isPlaying = false;
     characterPlayer.onPlayerStateChanged.listen((state) {
       if (state == PlayerState.playing) {
