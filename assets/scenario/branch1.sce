@@ -1,5 +1,5 @@
-H !
+background (cg) : 4.jpg
 
-input 1 : what's your name?
+你的名字是 ： $name
 
-jump 2 : branch2.sce
+Tomorin (stand start_3.wav) : demo下载 :: https:://github.com/cmachsocket/solar_engine

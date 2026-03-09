@@ -224,7 +224,7 @@ class DialDock extends StatelessWidget {
           alignment: Alignment.bottomCenter,
           child: Container(
             width: double.infinity,
-            color: Colors.black.withAlpha(50),
+            color: Colors.black.withAlpha(100),
             child: Column(
               children: [
                 Container(

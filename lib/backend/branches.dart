@@ -14,7 +14,7 @@ class BranchesDecide {
       Map<String, dynamic> globalVariables) {
     // TODO implement jump decide,it should return the index of the scenario to jump to, and it should also update the values map if necessary
     if (scenario == "start.sce") {
-      return globalVariables["branch1"] ?? 0;
+      return 0;
     }
     return 0;
   }

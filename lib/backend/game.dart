@@ -208,10 +208,14 @@ class GameEngine {
     for (var command in commands) {
       command = command.trim();
       if (command.isEmpty || command.startsWith("#")) continue;
-      if (command.contains(":")) {
-        final parts = command.split(":");
-        final cmd = parts[0].trim();
-        final arg = parts[1].trim();
+      final singleColon = RegExp(r'(?<!:):(?!:)').firstMatch(command);
+      if (singleColon != null) {
+        final cmd = command
+            .substring(0, singleColon.start)
+            .trim()
+            .replaceAll("::", ":");
+        final arg =
+            command.substring(singleColon.end).trim().replaceAll("::", ":");
         if (cmd.startsWith("background")) {
           if (cmd.lastIndexOf("(cg)") > 0) {
             results.add(ResourceUnion.withParams(CommandType.cg.index,

@@ -1,19 +1,25 @@
-background (cg) : cg2.png
+background (cg) : 1.jpg
 
-audio : space.wav
+audio : 空_草东没有派对.wav
 
-Miku (smile start_3.wav) : `使用 map 时复杂度为 $O(n \sqrt n log n)$ ，换成 unordered_map 后复杂度近似为 $O(n \sqrt n)$，没有卡map复杂度。` 
+Tomorin (stand start_3.wav) : 。。。如你所见，这是一个旮旯给木引擎。 
 
-Goodbye future,I stayed in my memories.
+background (cg) : 2.jpg
 
-Bocchi (stand) : Time wheels in celestial springs, see you tomorrow. 
+Tomorin (stand start_3.wav) : 下面是Markdown 测试 ,
 
-background (cg) : cg.png
+Tomorin (stand start_3.wav) : `$$\sum_{r=1}^n s_r p_r  -  s_{r-1} p_{n-r+1}$$ , 时间复杂度$O(n)$ , 线性预处理阶乘逆元即可`
 
-FUCK
+Tomorin (stand start_3.wav) : 为什么要做这个引擎？因为好处是，采用flutter它是原生跨平台的。
 
-STST
+Tomorin (penguin start_3.wav) : 谁不想急头白脸地在床上玩一顿旮旯给木呢？
 
-branches 1 : inside , outside
+background (cg) : 3.jpg
 
-jump : branch1.sce , branch2.sce
+而且现已支持分支和输入选项。
+
+Tomorin (penguin start_3.wav) : 你是凑企鹅你是凑企鹅你是凑企鹅你是凑企鹅你是凑企鹅
+
+input 1 : 你是谁啊？
+
+jump : branch1.sce
