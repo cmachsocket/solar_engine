@@ -1,6 +1,6 @@
 background (cg) : cg2.png
 
-# audio : space.wav
+audio : space.wav
 
 Miku (smile start_3.wav) : `使用 map 时复杂度为 $O(n \sqrt n log n)$ ，换成 unordered_map 后复杂度近似为 $O(n \sqrt n)$，没有卡map复杂度。` 
 

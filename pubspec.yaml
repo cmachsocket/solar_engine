@@ -18,6 +18,8 @@ dependencies:
   audioplayers: 
   flutter_markdown_plus_latex:
   flutter_markdown_plus:
+  toastification:
+  markdown:
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -18,11 +18,12 @@ class CGController extends GetxController {
   var currentScenario = Rx<dynamic>(null);
   var charactersName = "".obs;
   var backgroundImagePath = "".obs;
-  var bgmPath = "";
+  var bgmPath = "".obs;
   var scenarioPath = "";
   var isMute = false.obs;
   var isTextAnimating = false;
   var isCharacterAudioPlaying = false.obs;
+  var isBgmChanged = false.obs;
   RxDouble characterAudioRatio = 0.0.obs;
   var inputText = "".obs;
   var characterVoiceVolume = 100.obs; // percentage
@@ -108,10 +109,10 @@ class CGController extends GetxController {
       }
       await next();
     } else if (currentScenario.value.type == CommandType.audio.index) {
-      bgmPath = audioPath + currentScenario.value.resourcePath;
-      if (bgmPath.isNotEmpty) {
+      bgmPath.value = audioPath + currentScenario.value.resourcePath;
+      if (bgmPath.value.isNotEmpty) {
         _gameEngine.setAudio = currentScenario.value.resourcePath;
-        play_bgm(bgmPath);
+        play_bgm(bgmPath.value);
       }
 
       await next();
@@ -144,9 +145,9 @@ class CGController extends GetxController {
 
   void load_initial_scenario() {
     backgroundImagePath.value = imagePath + _gameEngine.gameBackground;
-    bgmPath = audioPath + _gameEngine.gameAudio;
-    if (bgmPath.isNotEmpty) {
-      play_bgm(bgmPath);
+    bgmPath.value = audioPath + _gameEngine.gameAudio;
+    if (bgmPath.value.isNotEmpty) {
+      play_bgm(bgmPath.value);
     }
   }
 
@@ -154,6 +155,7 @@ class CGController extends GetxController {
     await bgmPlayer.stop();
     // 可以设置为循环播放
     await bgmPlayer.setReleaseMode(ReleaseMode.loop);
+    isBgmChanged.value = true;
     await bgmPlayer.play(AssetSource(bgmPath),
         volume: isMute.value ? 0 : musicVolume.value / 100);
   }

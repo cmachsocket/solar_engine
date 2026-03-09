@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +14,7 @@ import 'package:solar_engine/controller/SettingsController.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_markdown_plus_latex/flutter_markdown_plus_latex.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:toastification/toastification.dart';
 
 class CGBinding extends Bindings {
   @override
@@ -37,6 +40,7 @@ class _CGPageState extends State<CGPage> {
   final String defaultBackgroundImagePath = "assets/images/default_cg.png";
   final Duration scrollNextCooldown = Duration(milliseconds: 300);
   final RxInt _lastScrollNextMs = 0.obs;
+  late Timer bgmChnagedTimer;
 
   @override
   void initState() {
@@ -49,6 +53,18 @@ class _CGPageState extends State<CGPage> {
     if (isMobileDevice()) {
       uiManager.showAndResetTimer();
     }
+    bgmChnagedTimer = Timer(const Duration(seconds: 1), () {
+      if (controller.isBgmChanged.value) {
+        toastification.show(
+          context: context, // optional if you use ToastificationWrapper
+          icon: const Icon(Icons.music_note),
+          title:
+              Text(controller.bgmPath.value.split('/').last.split('.').first),
+          autoCloseDuration: const Duration(seconds: 5),
+        );
+        controller.isBgmChanged.value = false;
+      }
+    });
   }
 
   @override
@@ -56,6 +72,7 @@ class _CGPageState extends State<CGPage> {
     if (isMobileDevice()) {
       uiManager.dispose();
     }
+    bgmChnagedTimer.cancel();
     super.dispose();
   }
 
