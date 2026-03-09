@@ -10,6 +10,7 @@ class CGController extends GetxController {
   final GameEngine _gameEngine = Get.find<GameEngine>();
   Timer? _fastForwardTimer;
   Timer? _autoModeTimer;
+  Timer? _audioStateTimer;
   var state = PageState.main.index.obs;
   var _isAdvancing = false;
   var currentIndex = 0.obs;
@@ -21,6 +22,8 @@ class CGController extends GetxController {
   var scenarioPath = "";
   var isMute = false.obs;
   var isTextAnimating = false;
+  var isCharacterAudioPlaying = false.obs;
+  RxDouble characterAudioRatio = 0.0.obs;
   var inputText = "".obs;
   var characterVoiceVolume = 100.obs; // percentage
   var musicVolume = 100.obs; // percentage
@@ -39,6 +42,11 @@ class CGController extends GetxController {
           next();
         }
       }
+    });
+    _audioStateTimer =
+        Timer.periodic(const Duration(milliseconds: 10), (timer) async {
+      isCharacterAudioPlaying.value = await is_character_audio_playing();
+      characterAudioRatio.value = await get_character_audio_ratio();
     });
     updateStates();
   }
@@ -123,10 +131,14 @@ class CGController extends GetxController {
     } else {
       _gameEngine.gameIndex = currentIndex.value;
       charactersName.value = currentScenario.value.characters.join(", ");
-      play_character_audio(currentScenario.value.charactersAudioPath);
+      play_character_audio(currentScenario.value.charactersAudioPath.isNotEmpty
+          ? audioPath + currentScenario.value.charactersAudioPath
+          : "");
       history.add(currentScenario.value.text);
       history_characters.add(charactersName.value);
-      isTextAnimating = true;
+      if (currentScenario.value.type == CommandType.text.index) {
+        isTextAnimating = true;
+      }
     }
   }
 
@@ -146,14 +158,13 @@ class CGController extends GetxController {
         volume: isMute.value ? 0 : musicVolume.value / 100);
   }
 
-  Future<RxDouble> get_character_audio_ratio() async {
+  Future<double> get_character_audio_ratio() async {
     Duration? totalDuration = await characterPlayer.getDuration();
     Duration? currentPosition = await characterPlayer.getCurrentPosition();
     if (totalDuration != null && currentPosition != null) {
-      return (currentPosition.inMilliseconds / totalDuration.inMilliseconds)
-          .obs;
+      return currentPosition.inMilliseconds / totalDuration.inMilliseconds;
     }
-    return 0.0.obs;
+    return 0.0;
   }
 
   Future<void> play_character_audio(String path) async {
@@ -163,16 +174,9 @@ class CGController extends GetxController {
         volume: isMute.value ? 0 : characterVoiceVolume.value / 100);
   }
 
-  bool is_character_audio_playing() {
-    bool isPlaying = false;
-    characterPlayer.onPlayerStateChanged.listen((state) {
-      if (state == PlayerState.playing) {
-        isPlaying = true;
-      } else {
-        isPlaying = false;
-      }
-    });
-    return isPlaying;
+  Future<bool> is_character_audio_playing() async {
+    PlayerState state = await characterPlayer.state;
+    return state == PlayerState.playing;
   }
 
   void start_hide_status() {
@@ -227,6 +231,7 @@ class CGController extends GetxController {
   void onClose() {
     stopFastForward();
     _autoModeTimer?.cancel();
+    _audioStateTimer?.cancel();
     characterPlayer.dispose();
     bgmPlayer.dispose();
     super.onClose();

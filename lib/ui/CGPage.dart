@@ -554,26 +554,12 @@ class IconBar extends StatelessWidget {
                       color: Colors.white,
                     ),
                     Offstage(
-                        offstage: !controller.is_character_audio_playing(),
+                        offstage: !controller.isCharacterAudioPlaying.value,
                         child: SizedBox(
-                          width: 120,
-                          child: FutureBuilder<RxDouble>(
-                            future: controller.get_character_audio_ratio(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return LinearProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return LinearProgressIndicator(value: 0.0);
-                              } else if (snapshot.hasData) {
-                                return LinearProgressIndicator(
-                                    value: snapshot.data!.value);
-                              } else {
-                                return LinearProgressIndicator(value: 0.0);
-                              }
-                            },
-                          ),
-                        ))
+                            width: 120,
+                            child: LinearProgressIndicator(
+                              value: controller.characterAudioRatio.value,
+                            )))
                   ],
                 ),
               ),

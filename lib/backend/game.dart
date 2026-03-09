@@ -260,22 +260,22 @@ class GameEngine {
             );
           }
           cmd.split(',').forEach((element) {
-            final parts = element.split(' ');
+            final parts = element.split('(');
             textUnion.characters.add(parts[0].trim());
+            final actionAndAudio = parts[1]
+                .trim()
+                .substring(
+                  0,
+                  parts[1].length - 1,
+                )
+                .split(' ');
             textUnion.actions.add(
-              parts[1].trim().substring(
-                    1,
-                    parts[1].length - 1,
-                  ), // remove parentheses
+              actionAndAudio[0].trim(),
             );
+            if (actionAndAudio.length > 1) {
+              textUnion.charactersAudioPath = actionAndAudio[1].trim();
+            }
           });
-          final audioPath = path.join(gameState["scenarioPath"],
-              "${gameState["scenario"]}_${results.length + 1}.wav");
-          textUnion.charactersAudioPath =
-              await fileManager.file_exists_and_not_empty(audioPath)
-                  ? audioPath
-                  : "";
-
           textUnion.build_character_paths();
           results.add(textUnion);
           //results.add(TextUnion.withParams(0, text: arg, character: cmd));
