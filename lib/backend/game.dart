@@ -9,7 +9,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'branches.dart';
 
-enum CommandType { text, image, audio, cg, jump, branches, input, markdown }
+enum CommandType {
+  text,
+  image,
+  audio,
+  cg,
+  jump,
+  branches,
+  input,
+  markdown,
+  page
+}
 
 const characterPath = "assets/characters/";
 const imagePath = "assets/images/";
@@ -62,7 +72,7 @@ class TextUnion {
 }
 
 class ResourceUnion {
-  int type = -1; // 1 : image , 2: audio ,3 image and cg
+  int type = -1; // 1 : image , 2: audio ,3 image and cg 4 page
   String resourcePath = "";
   ResourceUnion(this.type, this.resourcePath);
   ResourceUnion.withParams(this.type, {required this.resourcePath});
@@ -248,6 +258,11 @@ class GameEngine {
             sourceList: [],
             id: id,
             text: arg,
+          ));
+        } else if (cmd.startsWith("page")) {
+          results.add(ResourceUnion.withParams(
+            CommandType.page.index,
+            resourcePath: arg,
           ));
         } else {
           late TextUnion textUnion;

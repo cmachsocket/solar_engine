@@ -4,8 +4,9 @@ import 'package:get/get.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:solar_engine/backend/game.dart';
 import 'package:solar_engine/ui/SaveLoadPage.dart';
+import 'package:solar_engine/ui/BranchesPage.dart';
 
-enum PageState { main, history, fastForward, auto, branch, input, hiddenBar }
+enum PageState { main, fastForward, auto, hiddenBar }
 
 class CGController extends GetxController {
   final GameEngine _gameEngine = Get.find<GameEngine>();
@@ -127,7 +128,9 @@ class CGController extends GetxController {
       if (currentScenario.value.type == CommandType.input.index) {
         inputText.value = currentScenario.value.text;
       }
-      state.value = CommandType.branches.index;
+      Get.to(() => BranchesPage(), binding: BranchesBinding(), opaque: false);
+    } else if (currentScenario.value.type == CommandType.page.index) {
+      Get.toNamed(currentScenario.value.resourcePath);
     } else {
       _gameEngine.gameIndex = currentIndex.value;
       charactersName.value = currentScenario.value.characters.join(", ");

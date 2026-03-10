@@ -4,7 +4,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:solar_engine/backend/game.dart';
 import 'package:solar_engine/main.dart';
 import 'package:solar_engine/ui/SettingsPage.dart';
 import 'package:solar_engine/controller/CGController.dart';
@@ -14,6 +13,19 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_markdown_plus_latex/flutter_markdown_plus_latex.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:toastification/toastification.dart';
+import 'historyPage.dart';
+
+enum CommandType {
+  text,
+  image,
+  audio,
+  cg,
+  jump,
+  branches,
+  input,
+  markdown,
+  page
+}
 
 class CGBinding extends Bindings {
   @override
@@ -83,7 +95,7 @@ class _CGPageState extends State<CGPage> {
             if (controller.state.value == PageState.main.index) {
               final scrollDelta = pointerSignal.scrollDelta;
               // 3. 根据滚动的方向和距离执行相应的操作
-              logger.info("Pointer scroll detected: $scrollDelta");
+
               if (scrollDelta.dy > 0) {
                 final nowMs = DateTime.now().millisecondsSinceEpoch;
                 if (nowMs - _lastScrollNextMs.value <
@@ -95,7 +107,11 @@ class _CGPageState extends State<CGPage> {
                 controller.all_stop();
                 controller.next();
               } else if (scrollDelta.dy < 0) {
-                controller.state.value = PageState.history.index;
+                Get.to(
+                  () => HistoryPage(),
+                  binding: HistoryBinding(),
+                  opaque: false,
+                );
                 // 向上滚动，执行历史记录查看操作
               }
             }
@@ -129,26 +145,26 @@ class _CGPageState extends State<CGPage> {
                   child: DialDock(),
                 )),
             NavigationContainer(),
-            Obx(() => Offstage(
-                  offstage: controller.state.value != PageState.history.index,
-                  child: Focus(
-                    skipTraversal: true,
-                    onKeyEvent: (node, event) {
-                      if (event is KeyDownEvent &&
-                          event.logicalKey == LogicalKeyboardKey.escape) {
-                        controller.state.value = PageState.main.index;
-                        return KeyEventResult.handled;
-                      }
-                      return KeyEventResult.ignored;
-                    },
-                    child: HistoryContainer(),
-                  ),
-                )),
-            Obx(() => Offstage(
-                  offstage: controller.state.value != PageState.branch.index &&
-                      controller.state.value != PageState.input.index,
-                  child: BrachesContainer(),
-                )),
+            // Obx(() => Offstage(
+            //       offstage: controller.state.value != PageState.history.index,
+            //       child: Focus(
+            //         skipTraversal: true,
+            //         onKeyEvent: (node, event) {
+            //           if (event is KeyDownEvent &&
+            //               event.logicalKey == LogicalKeyboardKey.escape) {
+            //             controller.state.value = PageState.main.index;
+            //             return KeyEventResult.handled;
+            //           }
+            //           return KeyEventResult.ignored;
+            //         },
+            //         child: HistoryContainer(),
+            //       ),
+            //     )),
+            // Obx(() => Offstage(
+            //       offstage: controller.state.value != PageState.branch.index &&
+            //           controller.state.value != PageState.input.index,
+            //       child: BrachesContainer(),
+            //     )),
           ],
         ),
       ),
@@ -168,7 +184,8 @@ class CharacterRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.currentScenario.value.runtimeType != TextUnion) {
+      if (controller.currentScenario.value.type != CommandType.text.index &&
+          controller.currentScenario.value.type != CommandType.markdown.index) {
         return const SizedBox.shrink();
       }
 
@@ -259,7 +276,7 @@ class NormalText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() => AnimatedTextKit(
           key: ValueKey(
-              controller.currentScenario.value.runtimeType == TextUnion
+              controller.currentScenario.value.type == CommandType.text.index
                   ? controller.currentScenario.value.text
                   : ""),
           displayFullTextOnTap: true,
@@ -267,7 +284,7 @@ class NormalText extends StatelessWidget {
           onFinished: () => controller.isTextAnimating = false,
           animatedTexts: [
             TyperAnimatedText(
-              controller.currentScenario.value.runtimeType == TextUnion
+              controller.currentScenario.value.type == CommandType.text.index
                   ? controller.currentScenario.value.text
                   : "",
               speed: Duration(
@@ -305,7 +322,8 @@ class MarkdownText extends StatelessWidget {
             [LatexBlockSyntax()],
             [LatexInlineSyntax()],
           ),
-          data: (controller.currentScenario.value.runtimeType == TextUnion
+          data: (controller.currentScenario.value.type ==
+                  CommandType.markdown.index
               ? controller.currentScenario.value.text
               : ""),
           styleSheet: MarkdownStyleSheet(
@@ -374,14 +392,11 @@ class _KeyboardTackleState extends State<KeyboardTackle> {
         }
       }
       if (event.logicalKey == LogicalKeyboardKey.escape) {
-        if (controller.state.value == PageState.history.index) {
-          controller.state.value = PageState.main.index;
-        } else {
-          Get.to(
-            () => SettingsPage(),
-            binding: SettingsBinding(),
-          );
-        }
+        Get.to(
+          () => SettingsPage(),
+          binding: SettingsBinding(),
+        );
+
         return true;
       }
     }
@@ -535,8 +550,14 @@ class IconBar extends StatelessWidget {
                       color: Colors.white,
                     ),
                     IconButton(
-                        onPressed: () =>
-                            controller.state.value = PageState.history.index,
+                        onPressed: () {
+                          controller.all_stop();
+                          Get.to(
+                            () => HistoryPage(),
+                            binding: HistoryBinding(),
+                            opaque: false,
+                          );
+                        },
                         icon: Icon(
                           Icons.history,
                           color: Colors.white,
@@ -563,111 +584,5 @@ class IconBar extends StatelessWidget {
                 ),
               ),
             ))));
-  }
-}
-
-class HistoryContainer extends StatelessWidget {
-  late final CGController controller;
-  HistoryContainer({super.key}) {
-    controller = Get.find<CGController>();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black.withAlpha(150),
-      child: Column(children: [
-        Row(
-          children: [
-            IconButton(
-                icon: Icon(
-                  Icons.close,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  controller.state.value = PageState.main.index;
-                }),
-            Text(
-              "History",
-              style: TextStyle(color: Colors.white, fontSize: 18),
-            )
-          ],
-        ),
-        Expanded(
-          child: ListView.builder(
-              itemCount: controller.history.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(controller.history_characters[index],
-                      style: TextStyle(color: Colors.white70, fontSize: 18)),
-                  subtitle: Text(
-                    controller.history[index],
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                  onTap: () {
-                    controller.play_character_audio(
-                        controller.currentScenario.value.charactersAudioPath);
-                  },
-                );
-              }),
-        )
-      ]),
-    );
-  }
-}
-
-class BrachesContainer extends StatelessWidget {
-  late final CGController controller;
-  BrachesContainer({super.key}) {
-    controller = Get.find<CGController>();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() => Material(
-          color: Colors.black.withAlpha(150),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 20,
-            children: [
-              if (controller.currentScenario.value.type ==
-                  CommandType.branches.index)
-                for (int i = 0;
-                    i < controller.currentScenario.value.sourceList.length;
-                    i++)
-                  Align(
-                    alignment: Alignment.center,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await controller.select_branch(i);
-                      },
-                      child: Text(
-                        controller.currentScenario.value.sourceList[i],
-                        style: TextStyle(fontSize: 30),
-                      ),
-                    ),
-                  ),
-              if (controller.currentScenario.value.type ==
-                  CommandType.input.index)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 50.0),
-                  child: TextField(
-                    onSubmitted: (value) async {
-                      await controller.select_input(value);
-                    },
-                    style: TextStyle(fontSize: 24, color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: controller.inputText.value,
-                      hintStyle: TextStyle(fontSize: 24, color: Colors.white54),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white54, width: 2),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white, width: 2),
-                      ),
-                    ),
-                  ),
-                )
-            ],
-          ),
-        ));
   }
 }
