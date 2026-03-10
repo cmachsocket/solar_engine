@@ -73,17 +73,10 @@ class SaveLoadPage extends StatelessWidget {
                             await controller.load_game(index + 1);
                           }
                           if (Get.isRegistered<CGController>()) {
-                            Get.offAll(
-                              () => CGPage(
-                                firstLoad: true,
-                              ),
-                              binding: CGBinding(),
-                            );
+                            Get.back(result: true); // 关闭 SaveLoadPage，返回上一页
                           } else {
                             Get.to(
-                              () => CGPage(
-                                firstLoad: true,
-                              ),
+                              () => CGPage(),
                               binding: CGBinding(),
                             ); // 关闭 SaveLoadPage，返回上一页
                           }

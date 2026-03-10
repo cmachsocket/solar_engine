@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:solar_engine/backend/game.dart';
+import 'package:solar_engine/ui/SaveLoadPage.dart';
 
 enum PageState { main, history, fastForward, auto, branch, input, hiddenBar }
 
@@ -34,9 +35,8 @@ class CGController extends GetxController {
   final AudioPlayer bgmPlayer = AudioPlayer();
   CGController() {
     logger.info("Initializing CGController");
-    currentScenarios = _gameEngine.currentScenario;
-    currentIndex.value = _gameEngine.gameIndex;
-    scenarioPath = _gameEngine.scenarioPath;
+
+    initialize();
     _autoModeTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       if (state.value == PageState.auto.index) {
         if (!isTextAnimating && !await is_character_audio_playing()) {
@@ -49,7 +49,6 @@ class CGController extends GetxController {
       isCharacterAudioPlaying.value = await is_character_audio_playing();
       characterAudioRatio.value = await get_character_audio_ratio();
     });
-    updateStates();
   }
   Future<void> next() async {
     if (currentIndex.value < currentScenarios.length - 1) {
@@ -110,7 +109,7 @@ class CGController extends GetxController {
       await next();
     } else if (currentScenario.value.type == CommandType.audio.index) {
       bgmPath.value = audioPath + currentScenario.value.resourcePath;
-      if (bgmPath.value.isNotEmpty) {
+      if (currentScenario.value.resourcePath.isNotEmpty) {
         _gameEngine.setAudio = currentScenario.value.resourcePath;
         play_bgm(bgmPath.value);
       }
@@ -146,7 +145,7 @@ class CGController extends GetxController {
   void load_initial_scenario() {
     backgroundImagePath.value = imagePath + _gameEngine.gameBackground;
     bgmPath.value = audioPath + _gameEngine.gameAudio;
-    if (bgmPath.value.isNotEmpty) {
+    if (_gameEngine.gameAudio.isNotEmpty) {
       play_bgm(bgmPath.value);
     }
   }
@@ -255,5 +254,24 @@ class CGController extends GetxController {
     history.add(input);
     await _gameEngine.select_input(currentScenario.value.id, input);
     await next();
+  }
+
+  Future<void> save_load_jump(bool isSave) async {
+    all_stop();
+    var result = await Get.to(
+      () => SaveLoadPage(isSave: isSave),
+      binding: SaveLoadBinding(),
+    );
+    if (result == true) {
+      initialize();
+    }
+  }
+
+  void initialize() {
+    load_initial_scenario();
+    currentScenarios = _gameEngine.currentScenario;
+    currentIndex.value = _gameEngine.gameIndex;
+    scenarioPath = _gameEngine.scenarioPath;
+    updateStates();
   }
 }

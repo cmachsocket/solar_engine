@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:solar_engine/backend/game.dart';
 import 'package:solar_engine/main.dart';
 import 'package:solar_engine/ui/SettingsPage.dart';
-import 'package:solar_engine/ui/SaveLoadPage.dart';
 import 'package:solar_engine/controller/CGController.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:solar_engine/controller/SettingsController.dart';
@@ -25,9 +24,9 @@ class CGBinding extends Bindings {
 }
 
 class CGPage extends StatefulWidget {
-  final bool firstLoad;
-
-  const CGPage({super.key, required this.firstLoad});
+  const CGPage({
+    super.key,
+  });
 
   @override
   State<CGPage> createState() => _CGPageState();
@@ -46,9 +45,6 @@ class _CGPageState extends State<CGPage> {
   void initState() {
     super.initState();
     controller = Get.find<CGController>();
-    if (widget.firstLoad) {
-      controller.load_initial_scenario();
-    }
     uiManager = SystemUIAutoHideManager();
     if (isMobileDevice()) {
       uiManager.showAndResetTimer();
@@ -370,16 +366,10 @@ class _KeyboardTackleState extends State<KeyboardTackle> {
               : controller.startFastForward();
           return true;
         } else if (event.logicalKey == LogicalKeyboardKey.keyS) {
-          Get.to(
-            () => SaveLoadPage(isSave: true),
-            binding: SaveLoadBinding(),
-          );
+          controller.save_load_jump(true);
           return true;
         } else if (event.logicalKey == LogicalKeyboardKey.keyL) {
-          Get.to(
-            () => SaveLoadPage(isSave: false),
-            binding: SaveLoadBinding(),
-          );
+          controller.save_load_jump(false);
           return true;
         }
       }
@@ -501,24 +491,16 @@ class IconBar extends StatelessWidget {
                     ),
                     IconButton(
                       //TODO: save page
-                      onPressed: () {
-                        controller.all_stop();
-                        Get.to(
-                          () => SaveLoadPage(isSave: true),
-                          binding: SaveLoadBinding(),
-                        );
+                      onPressed: () async {
+                        controller.save_load_jump(true);
                       },
                       icon: Icon(Icons.save),
                       color: Colors.white,
                     ),
                     IconButton(
                       //TODO: load page
-                      onPressed: () {
-                        controller.all_stop();
-                        Get.to(
-                          () => SaveLoadPage(isSave: false),
-                          binding: SaveLoadBinding(),
-                        );
+                      onPressed: () async {
+                        controller.save_load_jump(false);
                       },
                       icon: Icon(Icons.file_upload),
                       color: Colors.white,

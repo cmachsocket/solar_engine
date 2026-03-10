@@ -166,11 +166,7 @@ class _MainPageState extends State<MainPage> {
                 ElevatedButton(
                   onPressed: () {
                     controller.load_default_scenario().then((_) {
-                      Get.to(
-                          () => CGPage(
-                                firstLoad: false,
-                              ),
-                          binding: CGBinding());
+                      Get.to(() => CGPage(), binding: CGBinding());
                     });
                   },
                   child: Text('Start game'),
